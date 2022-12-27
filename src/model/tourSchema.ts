@@ -4,7 +4,7 @@ interface TourInterface{
     name: string;
     price: number;
     rating: number;
-    duration: number;
+   
 
 }
 
@@ -12,6 +12,7 @@ const tourSchema = new mongoose.Schema<TourInterface>({
     name: {
         type: String,
         required: [true, 'A tour must have a name'],
+        unique:true
     },
     price: {
         type: Number,
@@ -20,11 +21,7 @@ const tourSchema = new mongoose.Schema<TourInterface>({
     rating: {
         type: Number,
         default: 4.5,
-    },
-    duration: {
-        type: Number,
-        required: [true, 'A tour must have a duration'],
-    },  
+    } 
     
 })
 

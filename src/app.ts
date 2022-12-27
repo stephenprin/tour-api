@@ -11,6 +11,10 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Express + TypeScript Server');
 });
 
+//routes
+import tourRoute from './routes/tourRoute';
+
+app.use('/api/v1/tours', tourRoute);
 
 
 //connecting too database and server
@@ -21,7 +25,7 @@ mongoose.set('strictQuery', true);
 mongoose.connect(process.env.DATABASE_URL as string, () => { 
   try {
     app.listen(PORT, () => {
-      console.log(`⚡️[server]: Server is running at https://localhost:${PORT}`);
+      console.log(`⚡️[server]: Server is running at http://localhost:${PORT}`);
     });
     console.log('Connected to Database');
   }catch (err) {

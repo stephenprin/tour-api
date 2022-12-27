@@ -12,13 +12,16 @@ app.use(express_1.default.json());
 app.get('/', (req, res) => {
     res.send('Express + TypeScript Server');
 });
+//routes
+const tourRoute_1 = __importDefault(require("./routes/tourRoute"));
+app.use('/api/v1/tours', tourRoute_1.default);
 //connecting too database and server
 const PORT = process.env.PORT || 3500;
 mongoose_1.default.set('strictQuery', true);
 mongoose_1.default.connect(process.env.DATABASE_URL, () => {
     try {
         app.listen(PORT, () => {
-            console.log(`⚡️[server]: Server is running at https://localhost:${PORT}`);
+            console.log(`⚡️[server]: Server is running at http://localhost:${PORT}`);
         });
         console.log('Connected to Database');
     }

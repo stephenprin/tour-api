@@ -8,6 +8,7 @@ const tourSchema = new mongoose_1.default.Schema({
     name: {
         type: String,
         required: [true, 'A tour must have a name'],
+        unique: true
     },
     price: {
         type: Number,
@@ -16,11 +17,7 @@ const tourSchema = new mongoose_1.default.Schema({
     rating: {
         type: Number,
         default: 4.5,
-    },
-    duration: {
-        type: Number,
-        required: [true, 'A tour must have a duration'],
-    },
+    }
 });
 const Tour = mongoose_1.default.model('Tour', tourSchema);
 exports.default = Tour;
