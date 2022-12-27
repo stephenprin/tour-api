@@ -9,6 +9,6 @@ const router = express_1.default.Router();
 router.get('/all-tours', tourController_1.getAllTours);
 router.get('/tour/:id', tourController_1.getTour);
 router.post('/tour', tourController_1.createTour);
-// router.patch('/tour/:id', updateTour);
-// router.delete('/tour/:id', deleteTour);
+router.patch('/tour/:id', tourController_1.updateTour);
+router.delete('/tour/:id', tourController_1.deleteTour);
 exports.default = router;

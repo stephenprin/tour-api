@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTour = exports.getAllTours = exports.createTour = void 0;
+exports.deleteTour = exports.updateTour = exports.getTour = exports.getAllTours = exports.createTour = void 0;
 const tourSchema_1 = __importDefault(require("../model/tourSchema"));
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 //create a tour
@@ -25,14 +25,14 @@ const createTour = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             rating,
         });
         res.status(http_status_codes_1.default.CREATED).json({
-            message: "Tour created successfully ",
+            message: "Tour created successfully 🦾 ",
             newTour
         });
     }
     catch (error) {
         res.status(http_status_codes_1.default.BAD_REQUEST).json({
             status: 'fail to create tour',
-            message: "Tour created already 👍🏼",
+            message: "Tour created already🥺 ",
         });
     }
 });
@@ -72,3 +72,42 @@ const getTour = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.getTour = getTour;
+//update a tour
+const updateTour = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = req.params.id;
+        const tour = yield tourSchema_1.default.findOneAndUpdate({ _id: id }, req.body, {
+            new: true,
+            runValidators: true
+        });
+        res.status(http_status_codes_1.default.OK).json({
+            message: "Successfully updated a tour 🦾",
+            tour
+        });
+    }
+    catch (_a) {
+        res.status(http_status_codes_1.default.BAD_REQUEST).json({
+            status: 'fail to update tour',
+            message: "An error occured",
+        });
+    }
+});
+exports.updateTour = updateTour;
+//delete a tour
+const deleteTour = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = req.params.id;
+        const tour = yield tourSchema_1.default.findByIdAndDelete({ _id: id });
+        res.status(http_status_codes_1.default.OK).json({
+            message: "Successfully deleted a tour 🦾",
+            tour
+        });
+    }
+    catch (_b) {
+        res.status(http_status_codes_1.default.BAD_REQUEST).json({
+            status: 'fail to delete tour',
+            message: "An error occured",
+        });
+    }
+});
+exports.deleteTour = deleteTour;
