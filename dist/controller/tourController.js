@@ -17,12 +17,23 @@ const tourSchema_1 = __importDefault(require("../model/tourSchema"));
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 //create a tour
 const createTour = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, price, rating } = req.body;
+    const { name, price, rating, duration, maxGroupSize, difficulty, ratingAverage, ratingQuantity, priceDiscount, summary, description, imageCover, images, startDates, } = req.body;
     try {
         const newTour = yield tourSchema_1.default.create({
             name,
             price,
             rating,
+            duration,
+            maxGroupSize,
+            difficulty,
+            ratingAverage,
+            ratingQuantity,
+            priceDiscount,
+            summary,
+            description,
+            imageCover,
+            images,
+            startDates,
         });
         res.status(http_status_codes_1.default.CREATED).json({
             message: "Tour created successfully 🦾 ",
@@ -40,7 +51,17 @@ exports.createTour = createTour;
 //get all tours
 const getAllTours = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const tours = yield tourSchema_1.default.find();
+        //build query
+        const queryObj = Object.assign({}, req.query);
+        const excludedFields = ['page', 'sort', 'limit', 'fields'];
+        excludedFields.forEach(el => delete queryObj[el]);
+        console.log(req.query, queryObj);
+        //advanced filtering
+        let queryStr = JSON.stringify(queryObj);
+        queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
+        const query = tourSchema_1.default.find(JSON.parse(queryStr));
+        //execute query
+        const tours = yield query;
         res.status(http_status_codes_1.default.OK).json({
             message: "Successfully got all tours 🦾",
             tours

@@ -4,12 +4,33 @@ import StatusCodes from 'http-status-codes';
 
 //create a tour
 export const createTour = async(req: Request, res: Response) => { 
-    const { name, price, rating} = req.body;
+    const { name, price, rating,duration,
+        maxGroupSize,
+        difficulty,
+        ratingAverage,
+        ratingQuantity,
+        priceDiscount,
+        summary,
+        description,
+        imageCover,
+        images,
+        startDates,} = req.body;
 try {
     const newTour = await Tour.create({
         name,
         price,
         rating,
+        duration,
+        maxGroupSize,
+        difficulty,
+        ratingAverage,
+        ratingQuantity,
+        priceDiscount,
+        summary,
+        description,
+        imageCover,
+        images,
+        startDates,
     
 
     })
@@ -29,7 +50,20 @@ try {
 //get all tours
 export const getAllTours = async (req: Request, res: Response) => { 
     try {
-        const tours = await Tour.find();
+        //build query
+        const queryObj = { ...req.query };
+        const excludedFields = ['page', 'sort', 'limit', 'fields'];
+        excludedFields.forEach(el => delete queryObj[el]);
+        console.log(req.query, queryObj);
+
+        //advanced filtering
+        let queryStr = JSON.stringify(queryObj);
+        queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
+
+        const query = Tour.find(JSON.parse(queryStr));
+        
+        //execute query
+        const tours = await query;
         res.status(StatusCodes.OK).json({
             message: "Successfully got all tours 🦾",
             tours

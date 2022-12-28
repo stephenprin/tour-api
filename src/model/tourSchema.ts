@@ -14,6 +14,8 @@ interface TourInterface{
     description: string;
     imageCover: string;
     images: string[];
+    createdAt: Date;
+    startDates: Date[];
 
 }
 
@@ -69,6 +71,11 @@ const tourSchema = new mongoose.Schema<TourInterface>({
         required: [true, 'A tour must have a cover image'],
     },
     images: [String],
+    createdAt: {
+        type: Date,
+        default: Date.now(),
+    },
+    startDates: [Date],
     
 })
 

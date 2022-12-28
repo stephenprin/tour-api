@@ -56,6 +56,11 @@ const tourSchema = new mongoose_1.default.Schema({
         required: [true, 'A tour must have a cover image'],
     },
     images: [String],
+    createdAt: {
+        type: Date,
+        default: Date.now(),
+    },
+    startDates: [Date],
 });
 const Tour = mongoose_1.default.model('Tour', tourSchema);
 exports.default = Tour;
