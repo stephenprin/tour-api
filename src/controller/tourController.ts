@@ -78,12 +78,25 @@ export const getAllTours = async (req: Request, res: Response) => {
             query = query.select('-__v');
         }
 
-        //execute query
+        //pagination
+        const page: number = parseInt(req.query.page as string) || 1;
+        const limit: number = parseInt(req.query.limit as string) || 10
+        const skip: number = (page - 1) * limit;
+
+        if (req.query.page) { 
+            const numTours = await Tour.countDocuments();
+            if (skip >= numTours) throw new Error('This page does not exist');
+        }
+
+        query = query.skip(skip).limit(limit);
+       //execute query
         const tours = await query;
         res.status(StatusCodes.OK).json({
             message: "Successfully got all tours 🦾",
+            tourCoount: tours.length,
             tours
         })
+
     
     } catch (error) {
         res.status(StatusCodes.BAD_REQUEST).json({
@@ -100,6 +113,7 @@ export const getTour = async (req: Request, res: Response) => {
         const tour = await Tour.findOne({_id:id});
         res.status(StatusCodes.OK).json({
             message: "Successfully got a tour 🦾",
+           
             tour
         })
     

@@ -75,10 +75,21 @@ const getAllTours = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         else {
             query = query.select('-__v');
         }
+        //pagination
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        if (req.query.page) {
+            const numTours = yield tourSchema_1.default.countDocuments();
+            if (skip >= numTours)
+                throw new Error('This page does not exist');
+        }
+        query = query.skip(skip).limit(limit);
         //execute query
         const tours = yield query;
         res.status(http_status_codes_1.default.OK).json({
             message: "Successfully got all tours 🦾",
+            tourCoount: tours.length,
             tours
         });
     }
