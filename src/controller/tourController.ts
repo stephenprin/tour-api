@@ -54,14 +54,30 @@ export const getAllTours = async (req: Request, res: Response) => {
         const queryObj = { ...req.query };
         const excludedFields = ['page', 'sort', 'limit', 'fields'];
         excludedFields.forEach(el => delete queryObj[el]);
-        console.log(req.query, queryObj);
+     
 
         //advanced filtering
         let queryStr = JSON.stringify(queryObj);
+    
         queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
 
-        const query = Tour.find(JSON.parse(queryStr));
-        
+        let query = Tour.find(JSON.parse(queryStr));
+
+        //sorting 
+        if (req.query.sort) {
+            let sortBy = req.query.sort as string;
+            query=query.sort(sortBy.split(',').join(' '));
+        } else {
+            query = query.sort('-createdAt');
+        }
+        //field limiting
+        if (req.query.fields) { 
+            const fields = req.query.fields as string;
+            query = query.select(fields.split(',').join(' '));
+        } else {
+            query = query.select('-__v');
+        }
+
         //execute query
         const tours = await query;
         res.status(StatusCodes.OK).json({
@@ -71,7 +87,7 @@ export const getAllTours = async (req: Request, res: Response) => {
     
     } catch (error) {
         res.status(StatusCodes.BAD_REQUEST).json({
-            status: 'fail to gell all tour',
+            status: 'fail to get all tour',
             message: "An error occured",
         });
     }
