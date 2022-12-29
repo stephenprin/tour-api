@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteTour = exports.updateTour = exports.getTour = exports.getAllTours = exports.createTour = void 0;
 const tourSchema_1 = __importDefault(require("../model/tourSchema"));
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
+const apiQuery_1 = __importDefault(require("../utils/apiQuery"));
 //create a tour
 const createTour = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, price, rating, duration, maxGroupSize, difficulty, ratingAverage, ratingQuantity, priceDiscount, summary, description, imageCover, images, startDates, } = req.body;
@@ -51,42 +52,9 @@ exports.createTour = createTour;
 //get all tours
 const getAllTours = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        //build query
-        const queryObj = Object.assign({}, req.query);
-        const excludedFields = ['page', 'sort', 'limit', 'fields'];
-        excludedFields.forEach(el => delete queryObj[el]);
-        //advanced filtering
-        let queryStr = JSON.stringify(queryObj);
-        queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
-        let query = tourSchema_1.default.find(JSON.parse(queryStr));
-        //sorting 
-        if (req.query.sort) {
-            let sortBy = req.query.sort;
-            query = query.sort(sortBy.split(',').join(' '));
-        }
-        else {
-            query = query.sort('-createdAt');
-        }
-        //field limiting
-        if (req.query.fields) {
-            const fields = req.query.fields;
-            query = query.select(fields.split(',').join(' '));
-        }
-        else {
-            query = query.select('-__v');
-        }
-        //pagination
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const skip = (page - 1) * limit;
-        if (req.query.page) {
-            const numTours = yield tourSchema_1.default.countDocuments();
-            if (skip >= numTours)
-                throw new Error('This page does not exist');
-        }
-        query = query.skip(skip).limit(limit);
         //execute query
-        const tours = yield query;
+        const features = new apiQuery_1.default(tourSchema_1.default.find(), req.query).filter().sort().limitFields().paginate();
+        const tours = yield features.query;
         res.status(http_status_codes_1.default.OK).json({
             message: "Successfully got all tours 🦾",
             tourCoount: tours.length,

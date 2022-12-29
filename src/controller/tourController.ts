@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express'
 import Tour from '../model/tourSchema';
 import StatusCodes from 'http-status-codes';
+import APIFeatures  from '../utils/apiQuery';
 
 //create a tour
 export const createTour = async(req: Request, res: Response) => { 
@@ -47,50 +48,15 @@ try {
 }
 
 
+
 //get all tours
 export const getAllTours = async (req: Request, res: Response) => { 
     try {
-        //build query
-        const queryObj = { ...req.query };
-        const excludedFields = ['page', 'sort', 'limit', 'fields'];
-        excludedFields.forEach(el => delete queryObj[el]);
-     
-
-        //advanced filtering
-        let queryStr = JSON.stringify(queryObj);
-    
-        queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
-
-        let query = Tour.find(JSON.parse(queryStr));
-
-        //sorting 
-        if (req.query.sort) {
-            let sortBy = req.query.sort as string;
-            query=query.sort(sortBy.split(',').join(' '));
-        } else {
-            query = query.sort('-createdAt');
-        }
-        //field limiting
-        if (req.query.fields) { 
-            const fields = req.query.fields as string;
-            query = query.select(fields.split(',').join(' '));
-        } else {
-            query = query.select('-__v');
-        }
-
-        //pagination
-        const page: number = parseInt(req.query.page as string) || 1;
-        const limit: number = parseInt(req.query.limit as string) || 10
-        const skip: number = (page - 1) * limit;
-
-        if (req.query.page) { 
-            const numTours = await Tour.countDocuments();
-            if (skip >= numTours) throw new Error('This page does not exist');
-        }
-
-        query = query.skip(skip).limit(limit);
+       
        //execute query
-        const tours = await query;
+        const features = new APIFeatures(Tour.find(), req.query).filter().sort().limitFields().paginate();
+
+     const tours = await features.query;
         res.status(StatusCodes.OK).json({
             message: "Successfully got all tours 🦾",
             tourCoount: tours.length,
