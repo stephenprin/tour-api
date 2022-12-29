@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteTour = exports.updateTour = exports.getTour = exports.getAllTours = exports.createTour = void 0;
+exports.getMonthlyTourPlan = exports.getTourStats = exports.deleteTour = exports.updateTour = exports.getTour = exports.getAllTours = exports.createTour = void 0;
 const tourSchema_1 = __importDefault(require("../model/tourSchema"));
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const apiQuery_1 = __importDefault(require("../utils/apiQuery"));
@@ -126,3 +126,86 @@ const deleteTour = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.deleteTour = deleteTour;
+const getTourStats = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const stats = yield tourSchema_1.default.aggregate([
+            {
+                $match: { ratingAverage: { $gte: 4.5 } }
+            },
+            {
+                $group: {
+                    _id: { $toUpper: '$difficulty' },
+                    numTours: { $sum: 1 },
+                    numRating: { $sum: '$ratingQuantity' },
+                    avgRating: { $avg: '$ratingAverage' },
+                    avgPrice: { $avg: '$price' },
+                    minPrice: { $min: '$price' },
+                    maxPrice: { $max: '$price' }
+                },
+            },
+            {
+                $sort: { avgPrice: 1 }
+            }
+        ]);
+        res.status(http_status_codes_1.default.OK).json({
+            message: "Successfully got tour stats 🦾",
+            stats
+        });
+    }
+    catch (error) {
+        res.status(http_status_codes_1.default.BAD_REQUEST).json({
+            status: 'fail',
+            message: error,
+        });
+    }
+});
+exports.getTourStats = getTourStats;
+const getMonthlyTourPlan = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const year = parseInt(req.params.year);
+        const plan = yield tourSchema_1.default.aggregate([
+            {
+                $unwind: '$startDates'
+            },
+            {
+                $match: {
+                    startDates: {
+                        $gte: new Date(`${year}-01-01`),
+                        $lte: new Date(`${year}-12-31`)
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: { $month: '$startDates' },
+                    numTourStarts: { $sum: 1 },
+                    tours: { $push: '$name' }
+                }
+            },
+            {
+                $addFields: { month: '$_id' }
+            },
+            {
+                $project: {
+                    _id: 0
+                }
+            },
+            {
+                $sort: { numTourStarts: -1 }
+            }, {
+                $limit: 5
+            }
+        ]);
+        res.status(http_status_codes_1.default.OK).json({
+            message: "Successfully got tour month 🦾",
+            plan
+        });
+    }
+    catch (error) {
+        res.status(http_status_codes_1.default.BAD_REQUEST).json({
+            status: 'fail',
+            message: error,
+        });
+    }
+});
+exports.getMonthlyTourPlan = getMonthlyTourPlan;
