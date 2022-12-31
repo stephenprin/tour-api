@@ -10,6 +10,8 @@ const tourSchema = new mongoose_1.default.Schema({
         required: [true, 'A tour must have a name'],
         unique: true,
         trim: true,
+        maxlength: [50, 'A tour name must have less or equal then 40 characters'],
+        minlength: [5, 'A tour name must have more or equal then 10 characters'],
     },
     price: {
         type: Number,
@@ -22,6 +24,8 @@ const tourSchema = new mongoose_1.default.Schema({
     ratingAverage: {
         type: Number,
         default: 4.5,
+        min: [1, 'Rating must be above 1.0'],
+        max: [5, 'Rating must be below 5.0'],
     },
     ratingQuantity: {
         type: Number,
@@ -38,9 +42,19 @@ const tourSchema = new mongoose_1.default.Schema({
     difficulty: {
         type: String,
         required: [true, 'A tour must have a difficulty'],
+        enum: {
+            values: ['easy', 'medium', 'difficult'],
+            message: 'Difficulty is either: easy, medium, difficult',
+        }
     },
     priceDiscount: {
         type: Number,
+        validate: {
+            validator: function (val) {
+                return val < this.price;
+            },
+            message: 'Discount price ({VALUE}) should be below regular price',
+        }
     },
     summary: {
         type: String,
@@ -62,6 +76,12 @@ const tourSchema = new mongoose_1.default.Schema({
         select: false,
     },
     startDates: [Date],
+}, {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+});
+tourSchema.virtual('durationWeeks').get(function () {
+    return (this.duration / 7).toFixed(1);
 });
 const Tour = mongoose_1.default.model('Tour', tourSchema);
 exports.default = Tour;

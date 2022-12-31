@@ -13,8 +13,10 @@ app.get('/', (req: Request, res: Response) => {
 
 //routes
 import tourRoute from './routes/tourRoute';
+import userRoute from './routes/userRoute';
 
 app.use('/api/v1/tours', tourRoute);
+app.use('/api/v1/users', userRoute);
 
 
 //connecting too database and server

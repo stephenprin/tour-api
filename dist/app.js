@@ -14,7 +14,9 @@ app.get('/', (req, res) => {
 });
 //routes
 const tourRoute_1 = __importDefault(require("./routes/tourRoute"));
+const userRoute_1 = __importDefault(require("./routes/userRoute"));
 app.use('/api/v1/tours', tourRoute_1.default);
+app.use('/api/v1/users', userRoute_1.default);
 //connecting too database and server
 const PORT = process.env.PORT || 3500;
 mongoose_1.default.set('strictQuery', true);
