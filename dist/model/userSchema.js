@@ -54,7 +54,8 @@ const userSchema = new mongoose_1.default.Schema({
         validate: {
             validator: function (el) {
                 return el === this.password;
-            }
+            },
+            message: 'Password are not the same'
         }
     }
 });

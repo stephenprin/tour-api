@@ -14,20 +14,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.signup = void 0;
 const userSchema_1 = __importDefault(require("../model/userSchema"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const signup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { name, email, password, confirmPassword, phone, userName } = req.body;
+        const { name, email, password, confirmPassword, userName, phone } = req.body;
         const newUser = yield userSchema_1.default.create({
             name,
             email,
             password,
-            phone,
             userName,
-            photo: "",
-            confirmPassword
+            confirmPassword,
+            phone
         });
+        const token = jsonwebtoken_1.default.sign({ id: newUser._id, email: newUser.email }, process.env.APP_SECRET, { expiresIn: process.env.EXPIRES_IN });
         res.status(201).json({
             MESSAGE: "User created successfully",
+            token,
             data: {
                 newUser
             }

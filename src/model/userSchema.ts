@@ -12,7 +12,7 @@ interface UserInterface{
     email: string;
     photo: string;
     password: string;
-    confirmPassword?:string
+    confirmPassword:string | undefined;
     phone:string
 
 }
@@ -58,7 +58,8 @@ const userSchema = new mongoose.Schema<UserInterface>({
         validate: {
             validator: function (this:UserInterface  ,el: string) { 
                 return el === this.password
-            }
+            },
+            message:'Password are not the same'
         }
     }
 
