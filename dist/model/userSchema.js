@@ -46,7 +46,8 @@ const userSchema = new mongoose_1.default.Schema({
     password: {
         type: String,
         required: [true, 'Please provide a password'],
-        minlength: 8
+        minlength: 8,
+        select: false
     },
     confirmPassword: {
         type: String,
@@ -68,5 +69,15 @@ userSchema.pre("save", function (next) {
         next();
     });
 });
+userSchema.methods.correctPassword = function (candidatePassword, userPassword) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            return yield bcryptjs_1.default.compare(candidatePassword, userPassword);
+        }
+        catch (error) {
+            return error;
+        }
+    });
+};
 const User = mongoose_1.default.model("User", userSchema);
 exports.default = User;
