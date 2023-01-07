@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const validator_1 = __importDefault(require("validator"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const crypto_1 = __importDefault(require("crypto"));
 const userSchema = new mongoose_1.default.Schema({
     name: {
         type: String,
@@ -23,10 +24,10 @@ const userSchema = new mongoose_1.default.Schema({
         maxlength: [30, 'A  name must have less or equal then 30 characters'],
         minlength: [5, 'A name must have more or equal then 30 characters'],
     },
-    userName: {
+    role: {
         type: String,
-        required: [true, 'Please provide a username'],
-        unique: true
+        enum: ['user', 'admin'],
+        default: 'user'
     },
     phone: {
         type: String,
@@ -58,7 +59,10 @@ const userSchema = new mongoose_1.default.Schema({
             },
             message: 'Password are not the same'
         }
-    }
+    },
+    passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date,
 });
 userSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -78,6 +82,19 @@ userSchema.methods.correctPassword = function (candidatePassword, userPassword) 
             return error;
         }
     });
+};
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+    if (this.passwordChangedAt) {
+        const changeTimeStamp = this.passwordChangedAt.getTime() / 1000;
+        return JWTTimestamp < changeTimeStamp;
+    }
+    return false;
+};
+userSchema.methods.createPasswordResetToken = function () {
+    const resetToken = crypto_1.default.randomBytes(32).toString("hex");
+    this.passwordResetToken = crypto_1.default.createHash("sha256").update(resetToken).digest("hex");
+    this.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000);
+    return resetToken;
 };
 const User = mongoose_1.default.model("User", userSchema);
 exports.default = User;

@@ -1,15 +1,13 @@
-import express, { application, Express, Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import logger from 'morgan';
 
 dotenv.config();
 const app= express();
 app.use(express.json());
 
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Express + TypeScript Server');
-});
 
 //routes
 import tourRoute from './routes/tourRoute';
@@ -18,7 +16,25 @@ import userRoute from './routes/userRoute';
 app.use('/api/v1/tours', tourRoute);
 app.use('/api/v1/users', userRoute);
 
+app.use((req: Request, res: Response, next: NextFunction) => {
+  console.log(req.headers)
+  next();
+})
 
+
+//error handling
+app.all('*', (req: Request, res: Response) => { 
+  res.status(404).json({
+    status: 'fail',
+    message: `Can't find ${req.originalUrl} on this server!`,
+  });
+  
+})
+
+
+
+
+ 
 //connecting too database and server
 const PORT = process.env.PORT || 3500;
 
